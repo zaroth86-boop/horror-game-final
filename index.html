@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10">
+<title>THE LAST HOUSE</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- Efek layar -->
+<div id="vignette"></div>
+<div id="fearOverlay"></div>
+<div id="hurtOverlay"></div>
+
+<!-- LOADING -->
+<section id="screen-loading" class="screen active">
+  <div class="loading-box">
+    <h1 class="logo">THE LAST HOUSE</h1>
+    <p class="logo-sub">THE HOUSE THAT REMEMBERS</p>
+    <div class="load-track"><div id="loadBar"></div></div>
+    <p id="loadText">Memuat...</p>
+    <p id="loadTip" class="tip"></p>
+  </div>
+</section>
+
+<!-- MENU UTAMA -->
+<section id="screen-menu" class="screen">
+  <div class="menu-wrap">
+    <h1 class="logo">THE LAST HOUSE</h1>
+    <p class="logo-sub">3D CO-OP HORROR · 3–4 PEMAIN</p>
+    <label class="field">
+      <span>NAMA PEMAIN</span>
+      <input id="playerName" type="text" maxlength="14" placeholder="Masukkan nama" autocomplete="off">
+    </label>
+    <div id="menuError" class="error"></div>
+    <nav class="menu-btns">
+      <button id="btnCreate" class="btn primary">CREATE ROOM</button>
+      <button id="btnJoin" class="btn">JOIN ROOM</button>
+      <button id="btnCharacter" class="btn">CHARACTER</button>
+      <button id="btnSettings" class="btn">SETTINGS</button>
+      <button id="btnHow" class="btn">HOW TO PLAY</button>
+    </nav>
+    <p id="serverStatus" class="server-status">Server: memeriksa...</p>
+  </div>
+</section>
+
+<!-- JOIN ROOM -->
+<section id="screen-join" class="screen">
+  <div class="panel">
+    <h2>JOIN ROOM</h2>
+    <label class="field">
+      <span>KODE ROOM</span>
+      <input id="joinCode" type="text" maxlength="5" placeholder="ABCDE" autocomplete="off" autocapitalize="characters">
+    </label>
+    <div id="joinError" class="error"></div>
+    <div class="row">
+      <button id="btnJoinConfirm" class="btn primary">GABUNG</button>
+      <button id="btnJoinBack" class="btn">KEMBALI</button>
+    </div>
+  </div>
+</section>
+
+<!-- ROOM -->
+<section id="screen-room" class="screen">
+  <div class="panel wide">
+    <h2>ROOM</h2>
+    <div class="code-row">
+      <span>KODE:</span>
+      <strong id="roomCode">-----</strong>
+      <button id="btnCopyCode" class="btn small">SALIN</button>
+    </div>
+    <ul id="playerList" class="player-list"></ul>
+    <p id="roomStatus" class="room-status">Menunggu pemain...</p>
+    <div class="row">
+      <button id="btnReady" class="btn">READY</button>
+      <button id="btnStart" class="btn primary" disabled>MULAI</button>
+      <button id="btnLeave" class="btn danger">KELUAR</button>
+    </div>
+  </div>
+</section>
+
+<!-- CHARACTER -->
+<section id="screen-character" class="screen">
+  <div class="panel wide">
+    <h2>CHARACTER</h2>
+    <div id="charGrid" class="char-grid">
+      <button class="char-card selected" data-char="arga">
+        <b>ARGA</b><small>Pemilik rumah. Tahu sejarah keluarganya.</small>
+      </button>
+      <button class="char-card" data-char="raka">
+        <b>RAKA</b><small>Pemberani, tapi sering ceroboh.</small>
+      </button>
+      <button class="char-card" data-char="dion">
+        <b>DION</b><small>Ahli teknologi, bawa peralatan elektronik.</small>
+      </button>
+      <button class="char-card" data-char="naya">
+        <b>NAYA</b><small>Paling peka pada kejadian aneh.</small>
+      </button>
+    </div>
+    <p id="charNote" class="hint">Jika karakter sudah dipakai pemain lain di room, server akan memberi karakter yang masih kosong.</p>
+    <div class="row">
+      <button id="btnCharBack" class="btn primary">SIMPAN</button>
+    </div>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section id="screen-settings" class="screen">
+  <div class="panel wide scroll">
+    <h2>SETTINGS</h2>
+    <div class="set-grid">
+      <label>Graphics Quality
+        <select id="set-graphics">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </label>
+      <label>Shadow Quality
+        <select id="set-shadow">
+          <option value="off">Off</option>
+          <option value="low" selected>Low</option>
+          <option value="high">High</option>
+        </select>
+      </label>
+      <label>Resolution Scale <output id="out-res"></output>
+        <input id="set-res" type="range" min="0.5" max="1" step="0.05" value="0.8">
+      </label>
+      <label>Mouse Sensitivity <output id="out-mouse"></output>
+        <input id="set-mouse" type="range" min="0.2" max="3" step="0.1" value="1">
+      </label>
+      <label>Camera Sensitivity (Touch) <output id="out-touch"></output>
+        <input id="set-touch" type="range" min="0.2" max="3" step="0.1" value="1">
+      </label>
+      <label>Master Volume <output id="out-master"></output>
+        <input id="set-master" type="range" min="0" max="1" step="0.05" value="0.8">
+      </label>
+      <label>Music Volume <output id="out-music"></output>
+        <input id="set-music" type="range" min="0" max="1" step="0.05" value="0.6">
+      </label>
+      <label>Sound Effect Volume <output id="out-sfx"></output>
+        <input id="set-sfx" type="range" min="0" max="1" step="0.05" value="0.8">
+      </label>
+      <label>Brightness <output id="out-bright"></output>
+        <input id="set-bright" type="range" min="0.8" max="2" step="0.05" value="1.2">
+      </label>
+      <label class="check">
+        <input id="set-mobile" type="checkbox">
+        Mobile Graphics Mode (lebih ringan)
+      </label>
+    </div>
+    <div class="row">
+      <button id="btnSettingsBack" class="btn primary">KEMBALI</button>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO PLAY -->
+<section id="screen-how" class="screen">
+  <div class="panel wide scroll">
+    <h2>HOW TO PLAY</h2>
+    <div class="how">
+      <h3>Tujuan</h3>
+      <p>Bekerja sama menyelesaikan misteri rumah: nyalakan listrik, kumpulkan 3 potongan foto, cari kunci, temukan rekaman, buka kamar terlarang, lalu cari jalan keluar.</p>
+      <h3>PC</h3>
+      <p>WASD gerak · Mouse kamera · E interaksi · Shift lari · Ctrl jongkok · F senter · Tab inventory · ESC menu</p>
+      <h3>Mobile</h3>
+      <p>Joystick kiri untuk gerak · geser layar kanan untuk kamera · tombol di kanan bawah untuk interaksi, lari, jongkok, senter, inventory.</p>
+      <h3>Tips</h3>
+      <p>Jangan menjauh dari tim. Pemain yang jatuh bisa dihidupkan kembali teman yang berdiri di dekatnya. Hantu bereaksi terhadap suara dan lari.</p>
+    </div>
+    <div class="row">
+      <button id="btnHowBack" class="btn primary">KEMBALI</button>
+    </div>
+  </div>
+</section>
+
+<!-- HUD -->
+<section id="hud" class="hidden">
+  <div id="crosshair"></div>
+  <div id="objectiveBox">
+    <small>OBJECTIVE</small>
+    <span id="objectiveText">-</span>
+  </div>
+  <div id="teamBox"></div>
+  <div id="statBox">
+    <div class="bar"><i id="healthBar"></i></div>
+    <div class="bar stamina"><i id="staminaBar"></i></div>
+  </div>
+  <div id="interactPrompt" class="hidden"><span id="interactText">INTERACT</span></div>
+  <div id="toast" class="hidden"></div>
+  <div id="subtitle" class="hidden"></div>
+  <div id="downedBox" class="hidden">
+    <b>KAMU JATUH</b>
+    <span>Tunggu teman menghidupkanmu kembali.</span>
+  </div>
+  <div id="reviveBox" class="hidden"><i id="reviveBar"></i></div>
+
+  <!-- Kontrol mobile -->
+  <div id="touchUI" class="hidden">
+    <div id="joyZone"><div id="joyBase"><div id="joyKnob"></div></div></div>
+    <div id="lookZone"></div>
+    <div class="touch-btns">
+      <button id="tbInteract" class="tbtn big">E</button>
+      <button id="tbRun" class="tbtn">RUN</button>
+      <button id="tbCrouch" class="tbtn">DUCK</button>
+      <button id="tbFlash" class="tbtn">LIGHT</button>
+      <button id="tbInv" class="tbtn">BAG</button>
+    </div>
+    <button id="tbPause" class="tbtn pause">II</button>
+  </div>
+</section>
+
+<!-- INVENTORY -->
+<section id="inventory" class="overlay hidden">
+  <div class="panel">
+    <h2>INVENTORY</h2>
+    <ul id="invList" class="inv-list"></ul>
+    <p id="invEmpty" class="hint">Kosong.</p>
+    <div class="row">
+      <button id="btnInvClose" class="btn primary">TUTUP</button>
+    </div>
+  </div>
+</section>
+
+<!-- NOTE VIEWER -->
+<section id="noteViewer" class="overlay hidden">
+  <div class="panel note">
+    <h2 id="noteTitle">CATATAN</h2>
+    <p id="noteBody"></p>
+    <div class="row">
+      <button id="btnNoteClose" class="btn primary">TUTUP</button>
+    </div>
+  </div>
+</section>
+
+<!-- CUTSCENE -->
+<section id="cutscene" class="hidden">
+  <div class="bar-top"></div>
+  <div class="bar-bottom"></div>
+  <div id="cutTitle"></div>
+  <div id="cutSubtitle"></div>
+  <button id="btnSkipCut" class="btn small">SKIP</button>
+  <div id="cutFade"></div>
+</section>
+
+<!-- PAUSE -->
+<section id="pause" class="overlay hidden">
+  <div class="panel">
+    <h2>PAUSE</h2>
+    <p class="hint">Game online tidak berhenti saat kamu membuka menu.</p>
+    <div class="row col">
+      <button id="btnResume" class="btn primary">LANJUT</button>
+      <button id="btnPauseSettings" class="btn">SETTINGS</button>
+      <button id="btnQuit" class="btn danger">KELUAR KE MENU</button>
+    </div>
+  </div>
+</section>
+
+<!-- AKHIR GAME -->
+<section id="screen-end" class="overlay hidden">
+  <div class="panel end">
+    <h2 id="endTitle">TAMAT</h2>
+    <p id="endText"></p>
+    <div class="row">
+      <button id="btnEndMenu" class="btn primary">KE MENU</button>
+    </div>
+  </div>
+</section>
+
+<!-- Banner koneksi -->
+<div id="netBanner" class="hidden">Koneksi terputus. Mencoba menyambung kembali...</div>
+
+<!-- Pesan putar layar (mobile portrait) -->
+<div id="rotateHint" class="hidden">Putar HP ke mode landscape untuk bermain.</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="script.js"></script>
+</body>
+  </html>
